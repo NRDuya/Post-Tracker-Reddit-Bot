@@ -1,8 +1,9 @@
 import os
 import praw
-import keyring
+import re
 from os.path import join, dirname
 from dotenv import load_dotenv
+from config import*
 
 # RETRIEVE client_id and client_secret FROM .env
 dotenv_path = join(dirname(__file__), '.env')
@@ -22,12 +23,12 @@ subreddit = reddit.subreddit('buildapcsales')
 def message():
     print("send text message of links")
 
-keywords = {"[Monitor]", "IPS"}
+#FUNCTION TO CHECK THE PRICE OF THE PRODUCT IN THE POST TITLE
+def isPrice(title):
+    price = re.findall(r"(?:[\$]{1})([\d]+.?\d)", title)
+    return float(price[0])
 
-for submission in subreddit.hot(limit=100):
-    title = submission.title.replace('$', '')
-
-    if all(x in title for x in keywords):
-        print(title) 
+for submission in subreddit.hot(limit = numOfSearches):
+    if (all(i in submission.title for i in keywords)) and (isPrice(submission.title) <= maxPrice):
+        print(submission.title) 
         print(submission.url)
-    
