@@ -4,6 +4,7 @@ import re
 from os.path import join, dirname
 from dotenv import load_dotenv
 from config import*
+from post import*
 
 # RETRIEVE client_id and client_secret FROM .env
 dotenv_path = join(dirname(__file__), '.env')
@@ -28,7 +29,17 @@ def isPrice(title):
     price = re.findall(r"(?:[\$]{1})([\d]+.?\d)", title)
     return float(price[0])
 
-for submission in subreddit.hot(limit = numOfSearches):
-    if (all(i in submission.title for i in keywords)) and (isPrice(submission.title) <= maxPrice):
-        print(submission.title) 
-        print(submission.url)
+submissionsList = []
+
+for submission in subreddit.rising(limit = numOfSearches):
+    if (all(i in submission.title for i in keywords)):
+        price = isPrice(submission.title)
+        if (price <= maxPrice): 
+            submissionsList.append(Post(submission.title, submission.url, price))
+
+sortedSubmissions =  sorted(submissionsList, key=lambda x: x.price, reverse=False)
+
+for i in sortedSubmissions:
+    print(i.title)
+    print(i.url)
+    print(i.price)
